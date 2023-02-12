@@ -264,6 +264,9 @@ parse_maps = {
     "VTG": [
         ("true_course", safe_float, 1),
         ("speed", convert_knots_to_mps, 5)
+    ],
+    "RSA": [
+        ("rudder_angle", safe_float, 1)
     ]
 }
 """A dictionary that maps from sentence identifier string (e.g. "GGA") to a list of tuples.
@@ -285,7 +288,7 @@ def parse_nmea_sentence(nmea_sentence):
     # Check for a valid nmea sentence
     nmea_sentence = nmea_sentence.strip()  # Cut possible carriage return or new line of NMEA Sentence
     if not re.match(
-            r'(^\$GP|^\$GN|^\$GL|^\$IN).*\*[0-9A-Fa-f]{2}$', nmea_sentence):
+            r'(^\$GP|^\$GN|^\$GL|^\$IN|^\$AG).*\*[0-9A-Fa-f]{2}$', nmea_sentence):
         logger.debug(
             "Regex didn't match, sentence not valid NMEA? Sentence was: %s" %
             repr(nmea_sentence))

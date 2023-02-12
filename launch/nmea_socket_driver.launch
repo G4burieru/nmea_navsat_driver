@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="ip" default="192.168.0.255" />
+  <arg name="ip" default="172.18.14.255" />
   <arg name="port" default="10110" />
   <arg name="frame_id" default="gps" />
   <arg name="use_GNSS_time" default="True" />

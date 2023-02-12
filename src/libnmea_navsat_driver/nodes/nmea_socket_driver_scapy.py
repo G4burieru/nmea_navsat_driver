@@ -42,26 +42,25 @@ import rospy
 from libnmea_navsat_driver.driver import RosNMEADriver
 import libnmea_navsat_driver.parser
 
+import re
+
 nmea_str = ""
 
 def packet_callback(packet):
     global nmea_str
     try:
-        # get payload from packet
         payload = packet[Raw].load
         nmea_raw = payload.decode('ascii')
-        # nmea_str = nmea_raw
-        # decode payload to string
-        # get only the nmea sentence (remove nmea headers)
-        splitted = nmea_raw.split("\\")
-        for sentence in splitted:
-            if sentence[0] == '$':
-                if '*' in sentence:
+        nmea_raw_splitted = nmea_raw.split("\\")
+        for sentence in nmea_raw_splitted:
+            try:
+                if sentence[0] == '$' or sentence[0] == '!':
                     nmea_str = sentence
+            except:
+                pass
     except:
         pass
 
-# if __name__ ==  '__main__':
 def main():
     """Create and run the nmea_socket_driver ROS node.
 
@@ -80,21 +79,15 @@ def main():
     driver = RosNMEADriver()
     frame_id = RosNMEADriver.get_frame_id()
 
-    f = open("/home/vsnt/log.txt", "a")
-
     # Handle incoming connections until ROS shuts down
     try:
         while not rospy.is_shutdown():
             conf.bufsize = 102400
             sniff(iface="vr-br", filter="port 10110", prn=packet_callback, count=1)
-            # rospy.logerr(nmea_str)
+            rospy.logerr(nmea_str)
             # print(nmea_str)
             driver.add_sentence(nmea_str, frame_id)
-            parsed_sentence = libnmea_navsat_driver.parser.parse_nmea_sentence(
-            nmea_str)
-            rospy.logerr(nmea_str)
-            f.write(nmea_str)
-        f.close()
+            # parsed_sentence = libnmea_navsat_driver.parser.parse_nmea_sentence(nmea_str)
+            # print(parsed_sentence)
     except Exception:
         rospy.logerr(traceback.format_exc())
-        f.close()

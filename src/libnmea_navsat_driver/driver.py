@@ -39,6 +39,7 @@ import rospy
 from sensor_msgs.msg import NavSatFix, NavSatStatus, TimeReference
 from geometry_msgs.msg import TwistStamped, QuaternionStamped
 from tf.transformations import quaternion_from_euler
+from mav_msgs.msg import Actuators
 
 from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
@@ -79,6 +80,7 @@ class RosNMEADriver(object):
         self.heading_pub = rospy.Publisher(
             'heading', QuaternionStamped, queue_size=1)
         self.use_GNSS_time = rospy.get_param('~use_GNSS_time', False)
+        self.rudder_pub = rospy.Publisher('rudder_angle', Actuators, queue_size=1)
         if not self.use_GNSS_time:
             self.time_ref_pub = rospy.Publisher(
                 'time_reference', TimeReference, queue_size=1)
@@ -333,6 +335,14 @@ class RosNMEADriver(object):
                 current_heading.quaternion.z = q[2]
                 current_heading.quaternion.w = q[3]
                 self.heading_pub.publish(current_heading)
+        elif 'RSA' in parsed_sentence:
+            data = parsed_sentence['RSA']
+            if data['rudder_angle']:
+                current_rudder_angle = Actuators()
+                current_rudder_angle.header.stamp = current_time
+                current_rudder_angle.header.frame_id = frame_id
+                current_rudder_angle.angles.append(data['rudder_angle'])
+                self.rudder_pub.publish(current_rudder_angle)
         else:
             return False
 
