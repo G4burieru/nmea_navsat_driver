@@ -7,7 +7,7 @@
   <arg name="time_ref_source" default="gps" />
   <arg name="useRMC" default="True" />
 
-  <node name="nmea_driver_scapy" pkg="nmea_navsat_driver" type="nmea_socket_driver_socket" output="screen">
+  <node name="nmea_driver_socket" pkg="nmea_navsat_driver" type="nmea_socket_driver_socket" output="screen">
     <param name="ip" value="$(arg ip)" />
     <param name="port" value="$(arg port)" />
     <param name="frame_id" value="$(arg frame_id)" />

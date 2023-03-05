@@ -79,15 +79,19 @@ def main():
     driver = RosNMEADriver()
     frame_id = RosNMEADriver.get_frame_id()
 
+    # f = open("/home/vsnt/nmea_sentences_14_02_2023.txt", "w")
+
     # Handle incoming connections until ROS shuts down
     try:
         while not rospy.is_shutdown():
             conf.bufsize = 102400
             sniff(iface="vr-br", filter="port 10110", prn=packet_callback, count=1)
             rospy.logerr(nmea_str)
+            # f.write(nmea_str)
             # print(nmea_str)
             driver.add_sentence(nmea_str, frame_id)
             # parsed_sentence = libnmea_navsat_driver.parser.parse_nmea_sentence(nmea_str)
             # print(parsed_sentence)
     except Exception:
         rospy.logerr(traceback.format_exc())
+        # f.close()
