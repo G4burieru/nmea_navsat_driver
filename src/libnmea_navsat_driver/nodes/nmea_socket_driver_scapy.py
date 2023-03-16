@@ -38,6 +38,7 @@ import sys
 import traceback
 from scapy.all import *
 import rospy
+from std_msgs.msg import String
 
 from libnmea_navsat_driver.driver import RosNMEADriver
 import libnmea_navsat_driver.parser
@@ -76,6 +77,8 @@ def main():
     """
     rospy.init_node('nmea_socket_driver_scapy')
 
+    # pub = rospy.Publisher('nmea_sentences', String, queue_size=10)
+
     driver = RosNMEADriver()
     frame_id = RosNMEADriver.get_frame_id()
 
@@ -86,7 +89,8 @@ def main():
         while not rospy.is_shutdown():
             conf.bufsize = 102400
             sniff(iface="vr-br", filter="port 10110", prn=packet_callback, count=1)
-            rospy.logerr(nmea_str)
+            # rospy.logerr(nmea_str)
+            # pub.publish(nmea_str)
             # f.write(nmea_str)
             # print(nmea_str)
             driver.add_sentence(nmea_str, frame_id)

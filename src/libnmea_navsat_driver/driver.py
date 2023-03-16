@@ -40,6 +40,7 @@ from sensor_msgs.msg import NavSatFix, NavSatStatus, TimeReference
 from geometry_msgs.msg import TwistStamped, QuaternionStamped
 from tf.transformations import quaternion_from_euler
 from mav_msgs.msg import Actuators
+from std_msgs.msg import String
 
 from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
@@ -84,6 +85,8 @@ class RosNMEADriver(object):
         if not self.use_GNSS_time:
             self.time_ref_pub = rospy.Publisher(
                 'time_reference', TimeReference, queue_size=1)
+            
+        self.nmea_pub = rospy.Publisher('nmea_sentences', String, queue_size=10)
 
         self.time_ref_source = rospy.get_param('~time_ref_source', None)
         self.use_RMC = rospy.get_param('~useRMC', False)
@@ -162,6 +165,20 @@ class RosNMEADriver(object):
         Returns:
             bool: True if the NMEA string is successfully processed, False if there is an error.
         """
+
+        try:
+            nmea_raw_splitted = nmea_string.split("\\")
+            for sentence in nmea_raw_splitted:
+                try:
+                    if sentence[0] == '$' or sentence[0] == '!':
+                        nmea_str = sentence
+                        print(nmea_str)
+                        self.nmea_pub.publish(nmea_str)
+                except:
+                    pass
+        except:
+            pass
+        
         if not check_nmea_checksum(nmea_string):
             rospy.logwarn("Received a sentence with an invalid checksum. " +
                           "Sentence was: %s" % repr(nmea_string))
