@@ -41,6 +41,7 @@ from geometry_msgs.msg import TwistStamped, QuaternionStamped
 from tf.transformations import quaternion_from_euler
 from mav_msgs.msg import Actuators
 from std_msgs.msg import String
+from rospy_tutorials.msg import HeaderString
 
 from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
@@ -86,7 +87,7 @@ class RosNMEADriver(object):
             self.time_ref_pub = rospy.Publisher(
                 'time_reference', TimeReference, queue_size=1)
             
-        self.nmea_pub = rospy.Publisher('nmea_sentences', String, queue_size=10)
+        self.nmea_pub = rospy.Publisher('nmea_sentences', HeaderString, queue_size=10)
 
         self.time_ref_source = rospy.get_param('~time_ref_source', None)
         self.use_RMC = rospy.get_param('~useRMC', False)
@@ -172,8 +173,12 @@ class RosNMEADriver(object):
                 try:
                     if sentence[0] == '$' or sentence[0] == '!':
                         nmea_str = sentence
-                        print(nmea_str)
-                        self.nmea_pub.publish(nmea_str)
+                        if nmea_str[0:6] != "$MXPGN" and nmea_str[0:9] != "$PSMDSTAT" and nmea_str[0:6] != "$AGRSA" and nmea_str[0:6] != "$ERRPM":
+                            print(nmea_str)
+                            pub_data = HeaderString()
+                            pub_data.header.stamp = rospy.get_rostime()
+                            pub_data.data = nmea_str
+                            self.nmea_pub.publish(pub_data)
                 except:
                     pass
         except:

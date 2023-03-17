@@ -285,7 +285,7 @@ def parse_nmea_sentence(nmea_sentence):
         A dict mapping string field names to values for each field in the NMEA sentence or
         False if the sentence could not be parsed.
     """
-    print(nmea_sentence)
+    # print(nmea_sentence)
     # Check for a valid nmea sentence
     nmea_sentence = nmea_sentence.strip()  # Cut possible carriage return or new line of NMEA Sentence
     if not re.match(
