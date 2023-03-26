@@ -267,7 +267,40 @@ parse_maps = {
     ],
     "RSA": [
         ("rudder_angle", safe_float, 1)
-    ]
+    ],
+    "GRS": [
+        ("fix_valid", convert_status_flag, 2)
+
+    ],
+     "GSA": [
+        ("mode_one", str, 1),
+        ("fix_type_", safe_int, 2),
+        ("prn_number_sat1", safe_int, 3),
+        ("prn_number_sat2", safe_int, 4),
+        ("prn_number_sat3", safe_int, 5),
+        ("prn_number_sat4", safe_int, 6),
+        ("prn_number_sat5", safe_int, 7),
+        ("prn_number_sat6", safe_int, 8),
+        ("prn_number_sat7", safe_int, 9),
+        ("prn_number_sat8", safe_int, 10),
+        ("prn_number_sat9", safe_int,11),
+        ("prn_number_sat10", safe_int, 12),
+        ("prn_number_sat11", safe_int, 13),
+        ("prn_number_sat12", safe_int, 14),
+        ("pdop", safe_float, 15),
+        ("hdop", safe_float, 16),
+        ("vdop", safe_float, 17),
+    ],
+
+    "ZDA": [
+        ("utc", safe_float, 1),
+        ("day", safe_int, 2),
+        ("month", safe_int, 3),
+        ("year", safe_int, 4),
+        ("day", safe_int, 5),
+        ("hour", safe_int, 6),
+        ("minutes", safe_int, 7),
+    ],
 }
 """A dictionary that maps from sentence identifier string (e.g. "GGA") to a list of tuples.
 Each tuple is a three-tuple of (str: field name, callable: conversion function, int: field index).
