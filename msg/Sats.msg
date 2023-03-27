@@ -1,5 +1,4 @@
-string mode
-int8 fix_type
+std_msgs/Header header
 int8 sat1
 int8 sat2
 int8 sat3
@@ -12,4 +11,3 @@ int8 sat9
 int8 sat10
 int8 sat11
 int8 sat12
-sensor_msgs/NavSatFix satfix 

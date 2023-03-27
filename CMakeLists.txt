@@ -15,10 +15,12 @@ if (CATKIN_ENABLE_TESTING)
 endif()
 
 find_package(sensor_msgs)
+find_package(mav_msgs)
 
 add_message_files(
   FILES
-  GSA.msg
+  Gsa.msg
+  Sats.msg
 )
 
 catkin_python_setup()
