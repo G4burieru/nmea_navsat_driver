@@ -45,7 +45,7 @@ import libnmea_navsat_driver.parser
 
 import re
 
-nmea_str = "$GPGSA,A,3,02,10,16,18,23,26,29,32,66,81,67,68,1.30,1.10,1.10*04"
+nmea_str = ""
 
 def packet_callback(packet):
     global nmea_str
