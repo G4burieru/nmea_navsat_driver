@@ -45,6 +45,7 @@ from rospy_tutorials.msg import HeaderString
 
 from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
+from nmea_navsat_driver.msg import Gsa
 
 
 class RosNMEADriver(object):
@@ -83,6 +84,7 @@ class RosNMEADriver(object):
             'heading', QuaternionStamped, queue_size=1)
         self.use_GNSS_time = rospy.get_param('~use_GNSS_time', False)
         self.rudder_pub = rospy.Publisher('rudder_angle', Actuators, queue_size=1)
+        self.gsa_pub = rospy.Publisher('gsa', Gsa, queue_size=1)
         if not self.use_GNSS_time:
             self.time_ref_pub = rospy.Publisher(
                 'time_reference', TimeReference, queue_size=1)
@@ -365,6 +367,34 @@ class RosNMEADriver(object):
                 current_rudder_angle.header.frame_id = frame_id
                 current_rudder_angle.angles.append(data['rudder_angle'])
                 self.rudder_pub.publish(current_rudder_angle)
+
+        elif 'GSA' in parsed_sentence:
+            data = parsed_sentence['GSA']
+            
+            gsa=Gsa()
+            gsa.mode=data['mode_one']
+            gsa.fix_type=data['fix_type_']
+            gsa.sats.sat1=data['prn_number_sat1']
+            gsa.sats.sat2=data['prn_number_sat2']
+            gsa.sats.sat3=data['prn_number_sat3']
+            gsa.sats.sat4=data['prn_number_sat4']
+            gsa.sats.sat5=data['prn_number_sat5']
+            gsa.sats.sat6=data['prn_number_sat6']
+            gsa.sats.sat7=data['prn_number_sat7']
+            gsa.sats.sat8=data['prn_number_sat8']
+            gsa.sats.sat9=data['prn_number_sat9']
+            gsa.sats.sat10=data['prn_number_sat10']
+            gsa.sats.sat11=data['prn_number_sat11']
+            gsa.sats.sat12=data['prn_number_sat12']
+            gsa.satfix.header.stamp = current_time
+            gsa.satfix.header.frame_id = frame_id
+            gsa.header.stamp = current_time
+            gsa.header.frame_id = frame_id
+            gsa.satfix.latitude=data['pdop']
+            gsa.satfix.longitude=data['hdop']
+            gsa.satfix.altitude=data['vdop']
+    
+            self.gsa_pub.publish(gsa)
         else:
             return False
 

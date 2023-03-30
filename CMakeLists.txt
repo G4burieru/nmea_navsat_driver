@@ -8,11 +8,31 @@ endif()
 if (CATKIN_ENABLE_TESTING)
   find_package(catkin REQUIRED COMPONENTS
     catkin_virtualenv
+    rospy
+    std_msgs
+    message_generation
   )
 endif()
 
+find_package(sensor_msgs)
+find_package(mav_msgs)
+
+add_message_files(
+  FILES
+  Gsa.msg
+  Sats.msg
+)
+
 catkin_python_setup()
-catkin_package()
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  sensor_msgs
+)
+catkin_package(
+  CATKIN_DEPENDS message_runtime
+)
 
 install(PROGRAMS
    scripts/nmea_serial_driver
@@ -52,3 +72,4 @@ if (CATKIN_ENABLE_TESTING)
   roslint_python()
   roslint_add_test()
 endif()
+
