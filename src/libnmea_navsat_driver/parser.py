@@ -297,9 +297,6 @@ parse_maps = {
         ("day", safe_int, 2),
         ("month", safe_int, 3),
         ("year", safe_int, 4),
-        ("day", safe_int, 5),
-        ("hour", safe_int, 6),
-        ("minutes", safe_int, 7),
     ],
 }
 """A dictionary that maps from sentence identifier string (e.g. "GGA") to a list of tuples.

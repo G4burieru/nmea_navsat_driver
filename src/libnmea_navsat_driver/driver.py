@@ -45,7 +45,7 @@ from rospy_tutorials.msg import HeaderString
 
 from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
-from nmea_navsat_driver.msg import Gsa
+from nmea_navsat_driver.msg import Gsa, Timedate
 
 
 class RosNMEADriver(object):
@@ -85,6 +85,7 @@ class RosNMEADriver(object):
         self.use_GNSS_time = rospy.get_param('~use_GNSS_time', False)
         self.rudder_pub = rospy.Publisher('rudder_angle', Actuators, queue_size=1)
         self.gsa_pub = rospy.Publisher('gsa', Gsa, queue_size=1)
+        self.zda_pub = rospy.Publisher('zda', Timedate, queue_size=1)
         if not self.use_GNSS_time:
             self.time_ref_pub = rospy.Publisher(
                 'time_reference', TimeReference, queue_size=1)
@@ -395,6 +396,20 @@ class RosNMEADriver(object):
             gsa.satfix.altitude=data['vdop']
     
             self.gsa_pub.publish(gsa)
+
+        elif 'ZDA' in parsed_sentence:
+            data = parsed_sentence['ZDA']
+
+            zda=Timedate()
+            zda.header.stamp = current_time
+            zda.header.frame_id = frame_id
+            zda.utc = data['utc']
+            zda.day = data['day']
+            zda.month = data['month']
+            zda.year = data['year']
+
+            self.zda_pub.publish(zda)
+
         else:
             return False
 
