@@ -176,10 +176,10 @@ class RosNMEADriver(object):
                     if sentence[0] == '$' or sentence[0] == '!':
                         nmea_str = sentence
                         if nmea_str[0:6] != "$MXPGN" and nmea_str[0:9] != "$PSMDSTAT" and nmea_str[0:6] != "$AGRSA" and nmea_str[0:6] != "$ERRPM":
-                            print(nmea_str)
                             pub_data = HeaderString()
                             pub_data.header.stamp = rospy.get_rostime()
-                            pub_data.data = nmea_str
+                            pub_data.data = nmea_str + "\r\n"
+                            print(pub_data.data)
                             self.nmea_pub.publish(pub_data)
                 except:
                     pass
