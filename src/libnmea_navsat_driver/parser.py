@@ -298,6 +298,12 @@ parse_maps = {
         ("month", safe_int, 3),
         ("year", safe_int, 4),
     ],
+    "RPM": [
+        ("engine_status", str, 1),
+        ("rpm", safe_float, 2),
+        ("engine_hours", safe_float, 3),
+        ("propeller_pitch", safe_float, 4),
+    ],
 }
 """A dictionary that maps from sentence identifier string (e.g. "GGA") to a list of tuples.
 Each tuple is a three-tuple of (str: field name, callable: conversion function, int: field index).

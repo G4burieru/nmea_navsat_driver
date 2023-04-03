@@ -22,6 +22,7 @@ add_message_files(
   Gsa.msg
   Sats.msg
   Timedate.msg
+  Engine.msg
 )
 
 catkin_python_setup()
