@@ -300,8 +300,8 @@ parse_maps = {
     ],
     "RPM": [
         ("engine_status", str, 1),
-        ("rpm", safe_float, 2),
-        ("engine_hours", safe_float, 3),
+        ("engine_hours", safe_float, 2),
+        ("rpm", safe_float, 3),
         ("propeller_pitch", safe_float, 4),
     ],
 }
