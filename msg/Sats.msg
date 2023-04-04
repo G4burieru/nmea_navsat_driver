@@ -1,0 +1,13 @@
+std_msgs/Header header
+int8 sat1
+int8 sat2
+int8 sat3
+int8 sat4
+int8 sat5
+int8 sat6
+int8 sat7
+int8 sat8
+int8 sat9
+int8 sat10
+int8 sat11
+int8 sat12

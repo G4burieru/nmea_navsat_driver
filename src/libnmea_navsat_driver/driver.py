@@ -39,9 +39,13 @@ import rospy
 from sensor_msgs.msg import NavSatFix, NavSatStatus, TimeReference
 from geometry_msgs.msg import TwistStamped, QuaternionStamped
 from tf.transformations import quaternion_from_euler
+from mav_msgs.msg import Actuators
+from std_msgs.msg import String
+from rospy_tutorials.msg import HeaderString
 
 from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
+from nmea_navsat_driver.msg import Gsa, Timedate, Engine
 
 
 class RosNMEADriver(object):
@@ -79,9 +83,15 @@ class RosNMEADriver(object):
         self.heading_pub = rospy.Publisher(
             'heading', QuaternionStamped, queue_size=1)
         self.use_GNSS_time = rospy.get_param('~use_GNSS_time', False)
+        self.rudder_pub = rospy.Publisher('rudder_angle', Actuators, queue_size=1)
+        self.gsa_pub = rospy.Publisher('gsa', Gsa, queue_size=1)
+        self.zda_pub = rospy.Publisher('zda', Timedate, queue_size=1)
+        self.rpm_pub = rospy.Publisher('rpm', Engine, queue_size=1)
         if not self.use_GNSS_time:
             self.time_ref_pub = rospy.Publisher(
                 'time_reference', TimeReference, queue_size=1)
+            
+        self.nmea_pub = rospy.Publisher('nmea_sentences', HeaderString, queue_size=10)
 
         self.time_ref_source = rospy.get_param('~time_ref_source', None)
         self.use_RMC = rospy.get_param('~useRMC', False)
@@ -160,6 +170,24 @@ class RosNMEADriver(object):
         Returns:
             bool: True if the NMEA string is successfully processed, False if there is an error.
         """
+
+        try:
+            nmea_raw_splitted = nmea_string.split("\\")
+            for sentence in nmea_raw_splitted:
+                try:
+                    if sentence[0] == '$' or sentence[0] == '!':
+                        nmea_str = sentence
+                        if nmea_str[0:6] != "$MXPGN" and nmea_str[0:9] != "$PSMDSTAT" and nmea_str[0:6] != "$AGRSA" and nmea_str[0:6] != "$ERRPM":
+                            pub_data = HeaderString()
+                            pub_data.header.stamp = rospy.get_rostime()
+                            pub_data.data = nmea_str + "\r\n"
+                            print(pub_data.data)
+                            self.nmea_pub.publish(pub_data)
+                except:
+                    pass
+        except:
+            pass
+        
         if not check_nmea_checksum(nmea_string):
             rospy.logwarn("Received a sentence with an invalid checksum. " +
                           "Sentence was: %s" % repr(nmea_string))
@@ -333,6 +361,70 @@ class RosNMEADriver(object):
                 current_heading.quaternion.z = q[2]
                 current_heading.quaternion.w = q[3]
                 self.heading_pub.publish(current_heading)
+        elif 'RSA' in parsed_sentence:
+            data = parsed_sentence['RSA']
+            if data['rudder_angle']:
+                current_rudder_angle = Actuators()
+                current_rudder_angle.header.stamp = current_time
+                current_rudder_angle.header.frame_id = frame_id
+                current_rudder_angle.angles.append(data['rudder_angle'])
+                self.rudder_pub.publish(current_rudder_angle)
+
+        elif 'GSA' in parsed_sentence:
+            data = parsed_sentence['GSA']
+            
+            gsa = Gsa()
+            gsa.mode = data['mode_one']
+            gsa.fix_type = data['fix_type_']
+            gsa.sats.sat1 = data['prn_number_sat1']
+            gsa.sats.sat2 = data['prn_number_sat2']
+            gsa.sats.sat3 = data['prn_number_sat3']
+            gsa.sats.sat4 = data['prn_number_sat4']
+            gsa.sats.sat5 = data['prn_number_sat5']
+            gsa.sats.sat6 = data['prn_number_sat6']
+            gsa.sats.sat7 = data['prn_number_sat7']
+            gsa.sats.sat8 = data['prn_number_sat8']
+            gsa.sats.sat9 = data['prn_number_sat9']
+            gsa.sats.sat10 = data['prn_number_sat10']
+            gsa.sats.sat11 = data['prn_number_sat11']
+            gsa.sats.sat12 = data['prn_number_sat12']
+            gsa.satfix.header.stamp = current_time
+            gsa.satfix.header.frame_id = frame_id
+            gsa.header.stamp = current_time
+            gsa.header.frame_id = frame_id
+            gsa.satfix.latitude = data['pdop']
+            gsa.satfix.longitude = data['hdop']
+            gsa.satfix.altitude = data['vdop']
+    
+            self.gsa_pub.publish(gsa)
+
+        elif 'ZDA' in parsed_sentence:
+            data = parsed_sentence['ZDA']
+
+            zda = Timedate()
+            zda.header.stamp = current_time
+            zda.header.frame_id = frame_id
+            zda.utc = data['utc']
+            zda.day = data['day']
+            zda.month = data['month']
+            zda.year = data['year']
+
+            self.zda_pub.publish(zda)
+
+        elif 'RPM' in parsed_sentence:
+            data = parsed_sentence['RPM']
+
+            rpm = Engine()
+            rpm.header.stamp = current_time
+            rpm.header.frame_id = frame_id
+            rpm.engine_status = data['engine_status']
+            rpm.rpm = data['rpm']
+            rpm.engine_hours = data['engine_hours']
+            rpm.propeller_pitch = data['propeller_pitch']
+
+            self.rpm_pub.publish(rpm)
+
+
         else:
             return False
 

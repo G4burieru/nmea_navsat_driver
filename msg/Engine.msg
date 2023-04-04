@@ -1,0 +1,5 @@
+std_msgs/Header header
+string engine_status
+float32 rpm
+float32 engine_hours
+float32 propeller_pitch
