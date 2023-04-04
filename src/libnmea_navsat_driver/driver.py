@@ -45,7 +45,7 @@ from rospy_tutorials.msg import HeaderString
 
 from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
-from nmea_navsat_driver.msg import Gsa, Timedate, Engine
+from nmea_navsat_driver.msg import Gsa, Timedate, Engine, Magnetic
 
 
 class RosNMEADriver(object):
@@ -87,6 +87,7 @@ class RosNMEADriver(object):
         self.gsa_pub = rospy.Publisher('gsa', Gsa, queue_size=1)
         self.zda_pub = rospy.Publisher('zda', Timedate, queue_size=1)
         self.rpm_pub = rospy.Publisher('rpm', Engine, queue_size=1)
+        self.hdg_pub = rospy.Publisher('hdg', Magnetic, queue_size=1)
         if not self.use_GNSS_time:
             self.time_ref_pub = rospy.Publisher(
                 'time_reference', TimeReference, queue_size=1)
@@ -424,6 +425,18 @@ class RosNMEADriver(object):
 
             self.rpm_pub.publish(rpm)
 
+        elif 'HDG' in parsed_sentence:
+            data = parsed_sentence['HDG']
+
+            hdg = Magnetic()
+            hdg.header.stamp = current_time
+            hdg.header.frame_id = frame_id
+            hdg.magnetic_sensor_heading = data['magnetic_sensor_heading']
+            hdg.magnetic_deviation = data['magnetic_deviation']
+            hdg.magnetic_deviation_direction = data['magnetic_deviation_direction']
+            hdg.magnetic_variation_degrees = data['magnetic_variation_degrees']
+
+            self.hdg_pub.publish(hdg)
 
         else:
             return False
