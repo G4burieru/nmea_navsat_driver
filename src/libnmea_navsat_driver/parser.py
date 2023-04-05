@@ -304,6 +304,12 @@ parse_maps = {
         ("rpm", safe_float, 3),
         ("propeller_pitch", safe_float, 4),
     ],
+    "HDG": [
+        ("magnetic_sensor_heading", safe_float, 1),
+        ("magnetic_deviation", safe_float, 2),
+        ("magnetic_deviation_direction", str, 3),
+        ("magnetic_variation_degrees", safe_float, 4),
+    ],
 }
 """A dictionary that maps from sentence identifier string (e.g. "GGA") to a list of tuples.
 Each tuple is a three-tuple of (str: field name, callable: conversion function, int: field index).
@@ -325,7 +331,7 @@ def parse_nmea_sentence(nmea_sentence):
     # Check for a valid nmea sentence
     nmea_sentence = nmea_sentence.strip()  # Cut possible carriage return or new line of NMEA Sentence
     if not re.match(
-            r'(^\$GP|^\$GN|^\$GL|^\$IN|^\$AG|^\$ER).*\*[0-9A-Fa-f]{2}$', nmea_sentence):
+            r'(^\$GP|^\$GN|^\$GL|^\$IN|^\$AG|^\$ER|^\$HC).*\*[0-9A-Fa-f]{2}$', nmea_sentence):
         logger.debug(
             "Regex didn't match, sentence not valid NMEA? Sentence was: %s" %
             repr(nmea_sentence))

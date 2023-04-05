@@ -18,7 +18,7 @@ class Test:
         self.timer_pub_msg = rospy.Timer(rospy.Duration(1), self.callback_timer_publish_msg)
 
     def callback_timer_publish_msg(self, event):
-        nmea_str = "$ERRPM,E,0,729.00,,A*52"
+        nmea_str = "$HCHDG,280.0,0.0,E,23.3,W*68"
         frame_id = RosNMEADriver.get_frame_id()
         self.driver.add_sentence(nmea_str, frame_id)
 

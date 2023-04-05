@@ -1,0 +1,5 @@
+std_msgs/Header header
+float32 magnetic_sensor_heading
+float32 magnetic_deviation
+string magnetic_deviation_direction
+float32 magnetic_variation_degrees

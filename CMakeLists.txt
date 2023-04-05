@@ -23,6 +23,7 @@ add_message_files(
   Sats.msg
   Timedate.msg
   Engine.msg
+  Magnetic.msg
 )
 
 catkin_python_setup()
