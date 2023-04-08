@@ -361,7 +361,23 @@ parse_maps = {
         ("utc", safe_float, 5),
         ("data_status", str, 6),
         ("mode_indicator", str, 7),
-    ]
+    ],
+    "VDM" : [
+        ("fragments_in_currently_accumulating_message", safe_int, 1),
+        ("fragment_number", safe_int, 2),
+        ("sequential_message_id", safe_int, 3),
+        ("radio_channel_code", str, 4),
+        ("data_payload", str, 5),
+        ("fill_bits", safe_int, 6),
+    ],
+    "VDO" : [
+        ("fragments_in_currently_accumulating_message", safe_int, 1),
+        ("fragment_number", safe_int, 2),
+        ("sequential_message_id", safe_int, 3),
+        ("radio_channel_code", str, 4),
+        ("data_payload", str, 5),
+        ("fill_bits", safe_int, 6),
+    ],
 
 }
 """A dictionary that maps from sentence identifier string (e.g. "GGA") to a list of tuples.
@@ -384,7 +400,7 @@ def parse_nmea_sentence(nmea_sentence):
     # Check for a valid nmea sentence
     nmea_sentence = nmea_sentence.strip()  # Cut possible carriage return or new line of NMEA Sentence
     if not re.match(
-            r'(^\$GP|^\$GN|^\$GL|^\$IN|^\$AG|^\$ER|^\$HC|^\$TI|^\$VD).*\*[0-9A-Fa-f]{2}$', nmea_sentence):
+            r'(^\$GP|^\$GN|^\$GL|^\$IN|^\$AG|^\$ER|^\$HC|^\$TI|^\$VD|^\!AI).*\*[0-9A-Fa-f]{2}$', nmea_sentence):
         logger.debug(
             "Regex didn't match, sentence not valid NMEA? Sentence was: %s" %
             repr(nmea_sentence))
