@@ -310,6 +310,50 @@ parse_maps = {
         ("magnetic_deviation_direction", str, 3),
         ("magnetic_variation_degrees", safe_float, 4),
     ],
+    "ROT": [
+        ("rate_of_turn", safe_float, 1),
+    ],
+    "GSV": [
+        ("total_gsv_msgs_in_this_cycle", safe_int, 1),
+        ("message_number", safe_int, 2),
+        ("total_number_of_SVs_visible", safe_int, 3),
+        ("SV1_PRN_number", safe_int, 4),
+        ("SV1_elevation", safe_int, 5),
+        ("SV1_azimuth", safe_int, 6),
+        ("SV1_SNR", safe_int, 7),
+        ("SV2_PRN_number", safe_int, 8),
+        ("SV2_elevation", safe_int, 9),
+        ("SV2_azimuth", safe_int, 10),
+        ("SV2_SNR", safe_int, 11),
+        ("SV3_PRN_number", safe_int, 12),
+        ("SV3_elevation", safe_int, 13),
+        ("SV3_azimuth", safe_int, 14),
+        ("SV3_SNR", safe_int, 15),
+        ("SV4_PRN_number", safe_int, 16),
+        ("SV4_elevation", safe_int, 17),
+        ("SV4_azimuth", safe_int, 18),
+        ("SV4_SNR", safe_int, 19),
+    ],
+    "VTG": [
+        ("track_made_good_degrees_true", safe_float, 1),
+        ("track_made_good_degrees_magnetic", safe_float, 3),
+        ("speed_in_knots", safe_float, 5),
+        ("speed_in_kph", safe_float, 7),
+        ("mode_indicator", str, 9),
+    ],
+    "VBW": [
+        ("water_speed_longitudinal_component", safe_float, 1),
+        ("water_speed_transverse_component", safe_float, 2),
+        ("water_speed_status_data", str, 3),
+        ("over_ground_velocity_longitudinal_component", safe_float, 4),
+        ("over_ground_velocity_transverse_component", safe_float, 5),
+        ("over_ground_velocity_status_data", str, 6),
+        ("stern_transverse_water_speed", safe_float, 7),
+        ("stern_transverse_water_speed_status_data", str, 8),
+        ("stern_transverse_ground_speed", safe_float, 9),
+        ("stern_transverse_ground_speed_status_data", str, 10),
+    ]
+
 }
 """A dictionary that maps from sentence identifier string (e.g. "GGA") to a list of tuples.
 Each tuple is a three-tuple of (str: field name, callable: conversion function, int: field index).
@@ -330,8 +374,9 @@ def parse_nmea_sentence(nmea_sentence):
     # print(nmea_sentence)
     # Check for a valid nmea sentence
     nmea_sentence = nmea_sentence.strip()  # Cut possible carriage return or new line of NMEA Sentence
+    nmea_sentence = nmea_sentence[:-3] # Cut Checksum data
     if not re.match(
-            r'(^\$GP|^\$GN|^\$GL|^\$IN|^\$AG|^\$ER|^\$HC).*\*[0-9A-Fa-f]{2}$', nmea_sentence):
+            r'(^\$GP|^\$GN|^\$GL|^\$IN|^\$AG|^\$ER|^\$HC|^\$TI|^\$VD).*\*[0-9A-Fa-f]{2}$', nmea_sentence):
         logger.debug(
             "Regex didn't match, sentence not valid NMEA? Sentence was: %s" %
             repr(nmea_sentence))
