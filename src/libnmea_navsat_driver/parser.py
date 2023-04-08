@@ -352,6 +352,15 @@ parse_maps = {
         ("stern_transverse_water_speed_status_data", str, 8),
         ("stern_transverse_ground_speed", safe_float, 9),
         ("stern_transverse_ground_speed_status_data", str, 10),
+    ],
+    "GLL": [
+        ("latitude", safe_float, 1),
+        ("latitude_direction", str, 2),
+        ("longitude", safe_float, 3),
+        ("longitude_direction", str, 4),
+        ("utc", safe_float, 5),
+        ("data_status", str, 6),
+        ("mode_indicator", str, 7),
     ]
 
 }
