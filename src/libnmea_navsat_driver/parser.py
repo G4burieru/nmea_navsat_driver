@@ -374,7 +374,6 @@ def parse_nmea_sentence(nmea_sentence):
     # print(nmea_sentence)
     # Check for a valid nmea sentence
     nmea_sentence = nmea_sentence.strip()  # Cut possible carriage return or new line of NMEA Sentence
-    nmea_sentence = nmea_sentence[:-3] # Cut Checksum data
     if not re.match(
             r'(^\$GP|^\$GN|^\$GL|^\$IN|^\$AG|^\$ER|^\$HC|^\$TI|^\$VD).*\*[0-9A-Fa-f]{2}$', nmea_sentence):
         logger.debug(
@@ -385,6 +384,7 @@ def parse_nmea_sentence(nmea_sentence):
 
     # Ignore the $ and talker ID portions (e.g. GP)
     sentence_type = fields[0][3:]
+    nmea_sentence = nmea_sentence[:-3] # Cut Checksum data
 
     if sentence_type not in parse_maps:
         logger.debug("Sentence type %s not in parse map, ignoring."
