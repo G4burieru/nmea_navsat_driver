@@ -1,0 +1,6 @@
+std_msgs/Header header
+float64 track_made_good_degrees_true
+float64 track_made_good_degrees_magnetic
+float64 speed_in_knots
+float64 speed_in_kph
+string mode_indicator

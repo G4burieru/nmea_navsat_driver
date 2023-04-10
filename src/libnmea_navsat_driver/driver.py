@@ -45,7 +45,7 @@ from rospy_tutorials.msg import HeaderString
 
 from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
-from nmea_navsat_driver.msg import Gsa, Timedate, Engine, Magnetic
+from nmea_navsat_driver.msg import *
 
 
 class RosNMEADriver(object):
@@ -88,6 +88,9 @@ class RosNMEADriver(object):
         self.zda_pub = rospy.Publisher('zda', Timedate, queue_size=1)
         self.rpm_pub = rospy.Publisher('rpm', Engine, queue_size=1)
         self.hdg_pub = rospy.Publisher('hdg', Magnetic, queue_size=1)
+        self.rot_pub = rospy.Publisher('rot', Rateofturn, queue_size=1)
+        self.gsv_pub = rospy.Publisher('gsv', Gsv, queue_size=1)
+        self.vtg_pub = rospy.Publisher('vtg', Trackmadegood, queue_size=1)
         if not self.use_GNSS_time:
             self.time_ref_pub = rospy.Publisher(
                 'time_reference', TimeReference, queue_size=1)
@@ -437,6 +440,66 @@ class RosNMEADriver(object):
             hdg.magnetic_variation_degrees = data['magnetic_variation_degrees']
 
             self.hdg_pub.publish(hdg)
+
+        elif 'ROT' in parsed_sentence:
+            data = parsed_sentence['ROT']
+
+            rot= Rateofturn()
+            rot.header.stamp = current_time
+            rot.header.frame_id = frame_id
+            rot.rate_of_turn = data['rate_of_turn']
+
+            self.rot_pub.publish(rot)
+
+        elif 'GSV' in parsed_sentence:
+            data = parsed_sentence['GSV']
+
+            gsv = Gsv()
+            gsv.header.stamp = current_time
+            gsv.header.frame_id = frame_id
+            gsv.total_gsv_msgs_in_this_cycle = data['total_gsv_msgs_in_this_cycle']
+            gsv.message_number = data['message_number']
+            gsv.total_number_of_SVs_visible = data['total_number_of_SVs_visible']
+            gsv.sv1.header.stamp = current_time
+            gsv.sv1.header.frame_id = frame_id
+            gsv.sv1.prn_number = data['SV1_PRN_number']
+            gsv.sv1.elevation = data['SV1_elevation']
+            gsv.sv1.azimuth = data['SV1_azimuth']
+            gsv.sv1.snr = data['SV1_SNR']
+            gsv.sv2.header.stamp = current_time
+            gsv.sv2.header.frame_id = frame_id
+            gsv.sv2.prn_number = data['SV2_PRN_number']
+            gsv.sv2.elevation = data['SV2_elevation']
+            gsv.sv2.azimuth = data['SV2_azimuth']
+            gsv.sv2.snr = data['SV2_SNR']
+            gsv.sv3.header.stamp = current_time
+            gsv.sv3.header.frame_id = frame_id
+            gsv.sv3.prn_number = data['SV3_PRN_number']
+            gsv.sv3.elevation = data['SV3_elevation']
+            gsv.sv3.azimuth = data['SV3_azimuth']
+            gsv.sv3.snr = data['SV3_SNR']
+            gsv.sv4.header.stamp = current_time
+            gsv.sv4.header.frame_id = frame_id
+            gsv.sv4.prn_number = data['SV4_PRN_number']
+            gsv.sv4.elevation = data['SV4_elevation']
+            gsv.sv4.azimuth = data['SV4_azimuth']
+            gsv.sv4.snr = data['SV4_SNR']
+
+            self.gsv_pub.publish(gsv)
+
+        elif 'VTG' in parsed_sentence:
+            data = parsed_sentence['VTG']
+
+            vtg = Trackmadegood()
+            vtg.header.stamp = current_time
+            vtg.header.frame_id = frame_id
+            vtg.track_made_good_degrees_true = data['track_made_good_degrees_true']
+            vtg.track_made_good_degrees_magnetic = data['track_made_good_degrees_magnetic']
+            vtg.speed_in_knots = data['speed_in_knots']
+            vtg.speed_in_kph = data['speed_in_kph']
+            vtg.mode_indicator = data['mode_indicator']
+
+            self.vtg_pub.publish(vtg)
 
         else:
             return False

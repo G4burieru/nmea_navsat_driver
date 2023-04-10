@@ -24,6 +24,10 @@ add_message_files(
   Timedate.msg
   Engine.msg
   Magnetic.msg
+  Rateofturn.msg
+  SV.msg
+  Gsv.msg
+  Trackmadegood.msg
 )
 
 catkin_python_setup()
