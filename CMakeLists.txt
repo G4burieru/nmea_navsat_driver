@@ -28,6 +28,9 @@ add_message_files(
   SV.msg
   Gsv.msg
   Trackmadegood.msg
+  Relativespeeds.msg
+  Gll.msg
+  Vd.msg
 )
 
 catkin_python_setup()

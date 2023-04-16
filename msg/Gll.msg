@@ -1,0 +1,5 @@
+std_msgs/Header header
+sensor_msgs/NavSatFix position
+nmea_navsat_driver/Timedate utc
+string data_status
+string mode_indicator

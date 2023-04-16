@@ -1,6 +1,6 @@
 import libnmea_navsat_driver.parser
 
-nmea_str = "$GPVTG,52.68,T,,M,0.00,N,0.00,K,A*04"
+nmea_str = "!AIVDM,1,1,,B,1:U8M80P00trH>QjqB`qdwvp2D2d,0*0A"
 
 parsed_sentence = libnmea_navsat_driver.parser.parse_nmea_sentence(nmea_str)
 

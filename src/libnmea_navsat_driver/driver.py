@@ -91,6 +91,10 @@ class RosNMEADriver(object):
         self.rot_pub = rospy.Publisher('rot', Rateofturn, queue_size=1)
         self.gsv_pub = rospy.Publisher('gsv', Gsv, queue_size=1)
         self.vtg_pub = rospy.Publisher('vtg', Trackmadegood, queue_size=1)
+        self.vbw_pub = rospy.Publisher('vbw', Relativespeeds, queue_size=1)
+        self.gll_pub = rospy.Publisher('gll', Gll, queue_size=1)
+        self.vdm_pub = rospy.Publisher('vdm', Vd, queue_size=1)
+        self.vdo_pub = rospy.Publisher('vdo', Vd, queue_size=1)
         if not self.use_GNSS_time:
             self.time_ref_pub = rospy.Publisher(
                 'time_reference', TimeReference, queue_size=1)
@@ -500,6 +504,80 @@ class RosNMEADriver(object):
             vtg.mode_indicator = data['mode_indicator']
 
             self.vtg_pub.publish(vtg)
+            # not working
+
+        elif 'VBW' in parsed_sentence:
+            data = parsed_sentence['VBW']
+
+            vbw = Relativespeeds()
+            vbw.header.stamp = current_time
+            vbw.header.frame_id = frame_id
+            vbw.water_speed_longitudinal_component = data['water_speed_longitudinal_component']
+            vbw.water_speed_transverse_component = data['water_speed_transverse_component']
+            vbw.water_speed_status_data = data['water_speed_status_data']
+            vbw.over_ground_velocity_longitudinal_component = data['over_ground_velocity_longitudinal_component']
+            vbw.over_ground_velocity_transverse_component = data['over_ground_velocity_transverse_component']
+            vbw.over_ground_velocity_status_data = data['over_ground_velocity_status_data']
+            vbw.stern_transverse_water_speed = data['stern_transverse_water_speed']
+            vbw.stern_transverse_water_speed_status_data= data['stern_transverse_water_speed_status_data']
+            vbw.stern_transverse_ground_speed = data['stern_transverse_ground_speed']
+            vbw.stern_transverse_ground_speed_status_data = data['stern_transverse_ground_speed_status_data']
+
+            self.vbw_pub.publish(vbw)
+
+        elif 'GLL' in parsed_sentence:
+            data = parsed_sentence['GLL']
+
+            gll = Gll()
+            gll.header.stamp = current_time
+            gll.header.frame_id = frame_id
+            latitude = data['latitude']
+            if data['latitude_direction'] == 'S':
+                latitude = -latitude
+            gll.position.latitude = latitude
+            longitude = data['longitude']
+            if data['longitude_direction'] == 'W':
+                longitude = -longitude
+            gll.position.longitude = longitude
+            gll.position.header.stamp = current_time
+            gll.position.header.frame_id = frame_id
+            gll.utc.utc = data['utc']
+            gll.utc.header.stamp = current_time
+            gll.utc.header.frame_id = frame_id
+            gll.data_status = data['data_status']
+            gll.mode_indicator = data['mode_indicator']
+
+            self.gll_pub.publish(gll)
+
+        elif 'VDM' in parsed_sentence:
+            data = parsed_sentence['VDM']
+
+            vdm = Vd()
+            vdm.header.stamp = current_time
+            vdm.header.frame_id = frame_id
+            vdm.fragments_in_currently_accumulating_message = data['fragments_in_currently_accumulating_message']
+            vdm.fragment_number = data['fragment_number']
+            vdm.sequential_message_id = data['sequential_message_id']
+            vdm.radio_channel_code = data['radio_channel_code']
+            vdm.data_payload = data['data_payload']
+            vdm.fill_bits = data['fill_bits']
+
+            self.vdm_pub.publish(vdm)
+
+        elif 'VDO' in parsed_sentence:
+            data = parsed_sentence['VDO']
+
+            vdo = Vd()
+            vdo.header.stamp = current_time
+            vdo.header.frame_id = frame_id
+            vdo.fragments_in_currently_accumulating_message = data['fragments_in_currently_accumulating_message']
+            vdo.fragment_number = data['fragment_number']
+            vdo.sequential_message_id = data['sequential_message_id']
+            vdo.radio_channel_code = data['radio_channel_code']
+            vdo.data_payload = data['data_payload']
+            vdo.fill_bits = data['fill_bits']
+
+            self.vdo_pub.publish(vdo)
 
         else:
             return False
