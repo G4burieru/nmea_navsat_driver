@@ -1,0 +1,8 @@
+std_msgs/Header header
+int8 total_gsv_msgs_in_this_cycle
+int8 message_number
+int8 total_number_of_SVs_visible
+nmea_navsat_driver/SV sv1
+nmea_navsat_driver/SV sv2
+nmea_navsat_driver/SV sv3
+nmea_navsat_driver/SV sv4

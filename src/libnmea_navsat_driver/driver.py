@@ -45,7 +45,7 @@ from rospy_tutorials.msg import HeaderString
 
 from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
-from nmea_navsat_driver.msg import Gsa, Timedate, Engine, Magnetic
+from nmea_navsat_driver.msg import *
 
 
 class RosNMEADriver(object):
@@ -80,14 +80,20 @@ class RosNMEADriver(object):
         """
         self.fix_pub = rospy.Publisher('fix', NavSatFix, queue_size=1)
         self.vel_pub = rospy.Publisher('vel', TwistStamped, queue_size=1)
-        self.heading_pub = rospy.Publisher(
-            'heading', QuaternionStamped, queue_size=1)
         self.use_GNSS_time = rospy.get_param('~use_GNSS_time', False)
         self.rudder_pub = rospy.Publisher('rudder_angle', Actuators, queue_size=1)
         self.gsa_pub = rospy.Publisher('gsa', Gsa, queue_size=1)
         self.zda_pub = rospy.Publisher('zda', Timedate, queue_size=1)
         self.rpm_pub = rospy.Publisher('rpm', Engine, queue_size=1)
         self.hdg_pub = rospy.Publisher('hdg', Magnetic, queue_size=1)
+        self.rot_pub = rospy.Publisher('rot', Rateofturn, queue_size=1)
+        self.gsv_pub = rospy.Publisher('gsv', Gsv, queue_size=1)
+        self.vtg_pub = rospy.Publisher('vtg', Trackmadegood, queue_size=1)
+        self.vbw_pub = rospy.Publisher('vbw', Relativespeeds, queue_size=1)
+        self.gll_pub = rospy.Publisher('gll', Gll, queue_size=1)
+        self.vdm_pub = rospy.Publisher('vdm', Vd, queue_size=1)
+        self.vdo_pub = rospy.Publisher('vdo', Vd, queue_size=1)
+        self.hdt_pub = rospy.Publisher('hdt', Hdt, queue_size=1)
         if not self.use_GNSS_time:
             self.time_ref_pub = rospy.Publisher(
                 'time_reference', TimeReference, queue_size=1)
@@ -279,18 +285,6 @@ class RosNMEADriver(object):
                 self.last_valid_fix_time = current_time_ref
                 self.time_ref_pub.publish(current_time_ref)
 
-        elif not self.use_RMC and 'VTG' in parsed_sentence:
-            data = parsed_sentence['VTG']
-
-            # Only report VTG data when you've received a valid GGA fix as
-            # well.
-            if self.valid_fix:
-                current_vel = TwistStamped()
-                current_vel.header.stamp = current_time
-                current_vel.header.frame_id = frame_id
-                current_vel.twist.linear.x = data['speed'] * math.sin(data['true_course'])
-                current_vel.twist.linear.y = data['speed'] * math.cos(data['true_course'])
-                self.vel_pub.publish(current_vel)
 
         elif 'RMC' in parsed_sentence:
             data = parsed_sentence['RMC']
@@ -352,16 +346,15 @@ class RosNMEADriver(object):
             self.alt_std_dev = data['alt_std_dev']
         elif 'HDT' in parsed_sentence:
             data = parsed_sentence['HDT']
-            if data['heading']:
-                current_heading = QuaternionStamped()
-                current_heading.header.stamp = current_time
-                current_heading.header.frame_id = frame_id
-                q = quaternion_from_euler(0, 0, math.radians(data['heading']))
-                current_heading.quaternion.x = q[0]
-                current_heading.quaternion.y = q[1]
-                current_heading.quaternion.z = q[2]
-                current_heading.quaternion.w = q[3]
-                self.heading_pub.publish(current_heading)
+            
+            hdt = Hdt()
+            hdt.header.stamp = current_time
+            hdt.header.frame_id = frame_id
+            hdt.heading = data['heading']
+            hdt.heading_relative = data['heading_relative']
+
+            self.hdt_pub.publish(hdt)
+
         elif 'RSA' in parsed_sentence:
             data = parsed_sentence['RSA']
             if data['rudder_angle']:
@@ -437,6 +430,135 @@ class RosNMEADriver(object):
             hdg.magnetic_variation_degrees = data['magnetic_variation_degrees']
 
             self.hdg_pub.publish(hdg)
+
+        elif 'ROT' in parsed_sentence:
+            data = parsed_sentence['ROT']
+
+            rot= Rateofturn()
+            rot.header.stamp = current_time
+            rot.header.frame_id = frame_id
+            rot.rate_of_turn = data['rate_of_turn']
+
+            self.rot_pub.publish(rot)
+
+        elif 'GSV' in parsed_sentence:
+            data = parsed_sentence['GSV']
+
+            gsv = Gsv()
+            gsv.header.stamp = current_time
+            gsv.header.frame_id = frame_id
+            gsv.total_gsv_msgs_in_this_cycle = data['total_gsv_msgs_in_this_cycle']
+            gsv.message_number = data['message_number']
+            gsv.total_number_of_SVs_visible = data['total_number_of_SVs_visible']
+            gsv.sv1.header.stamp = current_time
+            gsv.sv1.header.frame_id = frame_id
+            gsv.sv1.prn_number = data['SV1_PRN_number']
+            gsv.sv1.elevation = data['SV1_elevation']
+            gsv.sv1.azimuth = data['SV1_azimuth']
+            gsv.sv1.snr = data['SV1_SNR']
+            gsv.sv2.header.stamp = current_time
+            gsv.sv2.header.frame_id = frame_id
+            gsv.sv2.prn_number = data['SV2_PRN_number']
+            gsv.sv2.elevation = data['SV2_elevation']
+            gsv.sv2.azimuth = data['SV2_azimuth']
+            gsv.sv2.snr = data['SV2_SNR']
+            gsv.sv3.header.stamp = current_time
+            gsv.sv3.header.frame_id = frame_id
+            gsv.sv3.prn_number = data['SV3_PRN_number']
+            gsv.sv3.elevation = data['SV3_elevation']
+            gsv.sv3.azimuth = data['SV3_azimuth']
+            gsv.sv3.snr = data['SV3_SNR']
+            gsv.sv4.header.stamp = current_time
+            gsv.sv4.header.frame_id = frame_id
+            gsv.sv4.prn_number = data['SV4_PRN_number']
+            gsv.sv4.elevation = data['SV4_elevation']
+            gsv.sv4.azimuth = data['SV4_azimuth']
+            gsv.sv4.snr = data['SV4_SNR']
+
+            self.gsv_pub.publish(gsv)
+
+        elif 'VTG' in parsed_sentence:
+            data = parsed_sentence['VTG']
+
+            vtg = Trackmadegood()
+            vtg.header.stamp = current_time
+            vtg.header.frame_id = frame_id
+            vtg.track_made_good_degrees_true = data['track_made_good_degrees_true']
+            vtg.track_made_good_degrees_magnetic = data['track_made_good_degrees_magnetic']
+            vtg.speed_in_knots = data['speed_in_knots']
+            vtg.speed_in_kph = data['speed_in_kph']
+            vtg.mode_indicator = data['mode_indicator']
+
+            self.vtg_pub.publish(vtg)
+
+        elif 'VBW' in parsed_sentence:
+            data = parsed_sentence['VBW']
+
+            vbw = Relativespeeds()
+            vbw.header.stamp = current_time
+            vbw.header.frame_id = frame_id
+            vbw.water_speed_longitudinal_component = data['water_speed_longitudinal_component']
+            vbw.water_speed_transverse_component = data['water_speed_transverse_component']
+            vbw.water_speed_status_data = data['water_speed_status_data']
+            vbw.over_ground_velocity_longitudinal_component = data['over_ground_velocity_longitudinal_component']
+            vbw.over_ground_velocity_transverse_component = data['over_ground_velocity_transverse_component']
+            vbw.over_ground_velocity_status_data = data['over_ground_velocity_status_data']
+            vbw.stern_transverse_water_speed = data['stern_transverse_water_speed']
+            vbw.stern_transverse_water_speed_status_data= data['stern_transverse_water_speed_status_data']
+            vbw.stern_transverse_ground_speed = data['stern_transverse_ground_speed']
+            vbw.stern_transverse_ground_speed_status_data = data['stern_transverse_ground_speed_status_data']
+
+            self.vbw_pub.publish(vbw)
+
+        elif 'GLL' in parsed_sentence:
+            data = parsed_sentence['GLL']
+
+            gll = Gll()
+            gll.header.stamp = current_time
+            gll.header.frame_id = frame_id
+            gll.position.latitude = data['latitude']
+            gll.position.longitude = data['longitude']
+            gll.latitude_direction = data['latitude_direction']
+            gll.longitude_direction = data['longitude_direction']
+            gll.position.header.stamp = current_time
+            gll.position.header.frame_id = frame_id
+            gll.utc.utc = data['utc']
+            gll.utc.header.stamp = current_time
+            gll.utc.header.frame_id = frame_id
+            gll.data_status = data['data_status']
+            gll.mode_indicator = data['mode_indicator']
+
+            self.gll_pub.publish(gll)
+
+        elif 'VDM' in parsed_sentence:
+            data = parsed_sentence['VDM']
+
+            vdm = Vd()
+            vdm.header.stamp = current_time
+            vdm.header.frame_id = frame_id
+            vdm.fragments_in_currently_accumulating_message = data['fragments_in_currently_accumulating_message']
+            vdm.fragment_number = data['fragment_number']
+            vdm.sequential_message_id = data['sequential_message_id']
+            vdm.radio_channel_code = data['radio_channel_code']
+            vdm.data_payload = data['data_payload']
+            vdm.fill_bits = data['fill_bits']
+
+            self.vdm_pub.publish(vdm)
+
+        elif 'VDO' in parsed_sentence:
+            data = parsed_sentence['VDO']
+
+            vdo = Vd()
+            vdo.header.stamp = current_time
+            vdo.header.frame_id = frame_id
+            vdo.fragments_in_currently_accumulating_message = data['fragments_in_currently_accumulating_message']
+            vdo.fragment_number = data['fragment_number']
+            vdo.sequential_message_id = data['sequential_message_id']
+            vdo.radio_channel_code = data['radio_channel_code']
+            vdo.data_payload = data['data_payload']
+            vdo.fill_bits = data['fill_bits']
+
+            self.vdo_pub.publish(vdo)
 
         else:
             return False

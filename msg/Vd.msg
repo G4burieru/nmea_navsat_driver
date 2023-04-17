@@ -1,0 +1,7 @@
+std_msgs/Header header
+int8 fragments_in_currently_accumulating_message
+int8 fragment_number
+int8 sequential_message_id
+string radio_channel_code
+string data_payload
+int8 fill_bits
