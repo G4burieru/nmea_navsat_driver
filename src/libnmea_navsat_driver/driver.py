@@ -80,8 +80,6 @@ class RosNMEADriver(object):
         """
         self.fix_pub = rospy.Publisher('fix', NavSatFix, queue_size=1)
         self.vel_pub = rospy.Publisher('vel', TwistStamped, queue_size=1)
-        self.heading_pub = rospy.Publisher(
-            'heading', QuaternionStamped, queue_size=1)
         self.use_GNSS_time = rospy.get_param('~use_GNSS_time', False)
         self.rudder_pub = rospy.Publisher('rudder_angle', Actuators, queue_size=1)
         self.gsa_pub = rospy.Publisher('gsa', Gsa, queue_size=1)
@@ -95,6 +93,7 @@ class RosNMEADriver(object):
         self.gll_pub = rospy.Publisher('gll', Gll, queue_size=1)
         self.vdm_pub = rospy.Publisher('vdm', Vd, queue_size=1)
         self.vdo_pub = rospy.Publisher('vdo', Vd, queue_size=1)
+        self.hdt_pub = rospy.Publisher('hdt', Hdt, queue_size=1)
         if not self.use_GNSS_time:
             self.time_ref_pub = rospy.Publisher(
                 'time_reference', TimeReference, queue_size=1)
@@ -286,18 +285,6 @@ class RosNMEADriver(object):
                 self.last_valid_fix_time = current_time_ref
                 self.time_ref_pub.publish(current_time_ref)
 
-        elif not self.use_RMC and 'VTG' in parsed_sentence:
-            data = parsed_sentence['VTG']
-
-            # Only report VTG data when you've received a valid GGA fix as
-            # well.
-            if self.valid_fix:
-                current_vel = TwistStamped()
-                current_vel.header.stamp = current_time
-                current_vel.header.frame_id = frame_id
-                current_vel.twist.linear.x = data['speed'] * math.sin(data['true_course'])
-                current_vel.twist.linear.y = data['speed'] * math.cos(data['true_course'])
-                self.vel_pub.publish(current_vel)
 
         elif 'RMC' in parsed_sentence:
             data = parsed_sentence['RMC']
@@ -359,16 +346,15 @@ class RosNMEADriver(object):
             self.alt_std_dev = data['alt_std_dev']
         elif 'HDT' in parsed_sentence:
             data = parsed_sentence['HDT']
-            if data['heading']:
-                current_heading = QuaternionStamped()
-                current_heading.header.stamp = current_time
-                current_heading.header.frame_id = frame_id
-                q = quaternion_from_euler(0, 0, math.radians(data['heading']))
-                current_heading.quaternion.x = q[0]
-                current_heading.quaternion.y = q[1]
-                current_heading.quaternion.z = q[2]
-                current_heading.quaternion.w = q[3]
-                self.heading_pub.publish(current_heading)
+            
+            hdt = Hdt()
+            hdt.header.stamp = current_time
+            hdt.header.frame_id = frame_id
+            hdt.heading = data['heading']
+            hdt.heading_relative = data['heading_relative']
+
+            self.hdt_pub.publish(hdt)
+
         elif 'RSA' in parsed_sentence:
             data = parsed_sentence['RSA']
             if data['rudder_angle']:
@@ -504,7 +490,6 @@ class RosNMEADriver(object):
             vtg.mode_indicator = data['mode_indicator']
 
             self.vtg_pub.publish(vtg)
-            # not working
 
         elif 'VBW' in parsed_sentence:
             data = parsed_sentence['VBW']
@@ -531,14 +516,10 @@ class RosNMEADriver(object):
             gll = Gll()
             gll.header.stamp = current_time
             gll.header.frame_id = frame_id
-            latitude = data['latitude']
-            if data['latitude_direction'] == 'S':
-                latitude = -latitude
-            gll.position.latitude = latitude
-            longitude = data['longitude']
-            if data['longitude_direction'] == 'W':
-                longitude = -longitude
-            gll.position.longitude = longitude
+            gll.position.latitude = data['latitude']
+            gll.position.longitude = data['longitude']
+            gll.latitude_direction = data['latitude_direction']
+            gll.longitude_direction = data['longitude_direction']
             gll.position.header.stamp = current_time
             gll.position.header.frame_id = frame_id
             gll.utc.utc = data['utc']

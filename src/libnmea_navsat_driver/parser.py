@@ -260,6 +260,7 @@ parse_maps = {
     ],
     "HDT": [
         ("heading", safe_float, 1),
+        ("heading_relative", str, 2),
     ],
     "VTG": [
         ("true_course", safe_float, 1),

@@ -31,6 +31,7 @@ add_message_files(
   Relativespeeds.msg
   Gll.msg
   Vd.msg
+  Hdt.msg
 )
 
 catkin_python_setup()
