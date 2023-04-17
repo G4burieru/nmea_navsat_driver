@@ -39,6 +39,14 @@ class Test:
                     self.driver.add_sentence(nmea_str, frame_id)
                     time.sleep(1/10)
                     
+        while(True):
+            with open('sensor_msgs.txt', 'r') as file:
+                for line in file:
+                    nmea_str = line.strip()
+                    frame_id = RosNMEADriver.get_frame_id()
+                    self.driver.add_sentence(nmea_str, frame_id)
+                    time.sleep(1/10)
+                    
 
 test = Test()
 rospy.spin() 
