@@ -1,10 +1,20 @@
 import select
-import sys
 import traceback
 from scapy.all import *
-import rospy
 from std_msgs.msg import String
 import time
+import os
+import sys
+
+if 'ROS_NAMESPACE' not in os.environ:
+    # Default namespace if not set
+    # Note, didn't need to check sys.argv for `__ns:=...`,
+    # it seems __ns:= takes precidence over ROS_NAMESPACE
+
+    os.environ['ROS_NAMESPACE'] = '/nmea'
+
+
+import rospy
 
 from libnmea_navsat_driver.driver import RosNMEADriver
 import libnmea_navsat_driver.parser
@@ -14,7 +24,7 @@ import re
 nmea_str = ''
 
 class Test:
-    def __init__(self):
+    def __init__(self) :
         rospy.init_node('driver_test', anonymous= False)
 
         self.driver = RosNMEADriver()
