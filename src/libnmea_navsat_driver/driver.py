@@ -47,6 +47,18 @@ from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
 from nmea_navsat_driver.msg import *
 
+# from datetime import datetime
+# import os
+
+# try:
+#     os.mkdir('/home/vsnt/logs/')
+# except:
+#     pass
+
+# now = datetime.now()
+# dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
+
+# f = open('/home/vsnt/logs/'+dt_string, 'w')
 
 class RosNMEADriver(object):
     """ROS driver for NMEA GNSS devices."""
@@ -184,6 +196,7 @@ class RosNMEADriver(object):
                 try:
                     if sentence[0] == '$' or sentence[0] == '!':
                         nmea_str = sentence
+                        # f.write(nmea_str + "\r\n")
                         if nmea_str[0:6] != "$MXPGN" and nmea_str[0:9] != "$PSMDSTAT" and nmea_str[0:6] != "$AGRSA" and nmea_str[0:6] != "$ERRPM":
                             pub_data = HeaderString()
                             pub_data.header.stamp = rospy.get_rostime()

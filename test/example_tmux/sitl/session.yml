@@ -1,0 +1,19 @@
+name: real
+root: ./
+pre_window: export VSNT_ROS_PATH=/home/vsnt/vsnt_ws/src/vsnt_ros; source $VSNT_ROS_PATH/config/ros_remote.bash; export SERIAL_PORT_TYPE=real; export JOYSTICK_TYPE=ship_console
+startup_window: script
+windows:
+  - gps:
+      layout: tiled
+      panes:
+        - echo "casnav" | sudo -S socat -d -d pty,raw,echo=0,link=/dev/ttyVSP0 pty,raw,echo=0,link=/dev/ttyVSP1
+        - sleep 2; cd /home/vsnt/vsnt_ws/src/nmea_navsat_driver/test; echo "casnav" | sudo -S chmod 666 /dev/ttyVSP0; python gps_ardupilot.py
+  - ais:
+      layout: tiled
+      panes:
+        - echo "casnav" | sudo -S socat -d -d pty,raw,echo=0,link=/dev/ttyVSP2 pty,raw,echo=0,link=/dev/ttyVSP3
+        - sleep 2; cd /home/vsnt/vsnt_ws/src/nmea_navsat_driver/test; echo "casnav" | sudo -S chmod 666 /dev/ttyVSP2; python ais_ardupilot.py
+  - ardupilot:
+      layout: tiled
+      panes:
+        - sleep 5; cd /home/vsnt/ardupilot/Rover; echo "casnav" | sudo -S chmod 666 /dev/ttyVSP1; echo "casnav" | sudo -S chmod 666 /dev/ttyVSP3; sim_vehicle.py -v Rover -A "--serial3=uart:/dev/ttyVSP1:115200 --serial5=uart:/dev/ttyVSP3:115200" -f motorboat --console --map
